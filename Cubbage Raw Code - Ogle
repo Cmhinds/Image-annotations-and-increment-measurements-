@@ -1,0 +1,249 @@
+################# Arctic Grayling Fin ray aging code 
+################# Author: Taylor Cubbage
+################# Date: 8/6/22
+
+#####Installing packages
+install.packages("RFishBC")
+library(RFishBC)
+
+library(dplyr)
+
+######Setting working directory. This is where the **50 um only** fin ray photos are saved on your computer, 
+#so be sure to update accordingly.
+setwd("/Users/Katja/OneDrive/Documents/R/Lingcod analyses/Aging")
+
+
+#Creating object of all images with names VE and ending in .tif
+imgs <- listFiles("tif",other="VE")
+#Creating object of all image ID's 
+ids <- getID(imgs)
+
+#This next command will pull up the first finray to be labeled with annuli increments. "Reading" is the reader's initials (mine is Taylor Lindsey CUbbage TLC,
+#please update with your initials), edgeIsAnnulus = false because pike were still growing at time of capture, makeTransect = false because if true, it makes
+#a straight line rather than following the curve of the finray. ScaleBar = TRUE because I have a scale bar in the photo.
+#When the image comes up, the first task will be to measure the 50 um scale bar in the photo to give a reference
+#point for the annuli increments. Then once the scale bar is labeled, 
+#it will ask you to mark the focus/origin of the finray, then each annuli, then lastly the margin/edge of the finray. Many fish appear 
+#All measurements are saved in an R file that is created for each finray (.rds file). 
+
+#Lets look at the first fin ray
+digitizeRadii(imgs[1],id=ids[1],reading="KIB"#Update with your initials ***** ANYWHERE you see my initials TLC, please update with YOUR initials in the following code.
+              ,edgeIsAnnulus=FALSE, scaleBar = TRUE, scaleBarLength = 997, scaleBarUnits = "um", makeTransect = FALSE)
+
+#Check over the cleithrum that was labeled. Cool right?
+showDigitizedImage("VE_SL1.1.tif_KIB.rds")#Update with your initials
+
+###########Notes before you jump in
+# f for finish will move to the next task/image
+# d for delete will delete the point you just marked
+# q for abort will skip the current image and move to the next image
+# z for restart will let you begin labelling the current image again
+# k for kill will exit out of labelling images but save the previously labeled images
+
+# if you try to run code to start labelling images but don't see anything pop up, it's likely you have an old pop-up open and need to close it.
+# if you can't see the whole cleithrum or the scale bar in the photo, make the window a bit bigger by pulling on the edges. For cleithra with broken edges, I 
+# have been estimating where the end of the cleithrum should be with the last point, but it might be best to just leave those out of the analysis.
+# I'm not sure yet.
+
+#The annuli are the clear, translucent parts of the cleithra during the winter, the opaque bands are during faster summer growth
+#The edge is always a little translucent and is probably not an annuli because most of the pike would have grown some since the "winter" annuli
+
+#Labelling the images 
+#As there are three levels of magnification for photos that have different scale bar lengths (50, 100, and 200),
+#and each rendition of the aging code requires inputting the scale bar length, I have separated the photos by their scale bar length. This first set is 
+#with a scale bar of 50 um and contains 17 images. Since the three scale bar types have to be in different folders, you have to reset your working directory to age the 
+#other sets of finrays. BUt since we are already working in the 50 um folder, we can move forward. THese lines of code will cycle you through about 10 images.
+
+#digitizeRadii(imgs[2:10],id=ids[2:10],reading="KIB",edgeIsAnnulus=FALSE, scaleBar = TRUE, scaleBarLength = 50, scaleBarUnits = "um", makeTransect = FALSE)
+
+#digitizeRadii(imgs[11:17],id=ids[11:17],reading="KIB",edgeIsAnnulus=FALSE, scaleBar = TRUE, scaleBarLength = 50, scaleBarUnits = "um", makeTransect = FALSE)
+
+#visualize .rds files we just made
+#listFiles("rds")
+#Create object of .rds files
+#fns_KIB_50um <- listFiles("rds",other=c("FR","KIB"))
+
+
+#now lets reset our working directory for the 726 um set of photos 
+setwd("/Users/Katja/OneDrive/Documents/R/Lingcod analyses/Aging/726 um")
+
+
+#Creating object of all images with names FR and ending in .tif
+imgs <- listFiles("tif",other="VE")
+#Creating object of all image ID's 
+ids <- getID(imgs)
+#only one photo with 726 um
+
+
+digitizeRadii(imgs[1],id=ids[1],reading="KIB",edgeIsAnnulus=FALSE, scaleBar = TRUE, scaleBarLength = 1000, scaleBarUnits = "um", makeTransect = FALSE)
+#finished with folder 726 um
+#visualize .rds files we just made
+listFiles("rds")
+#Create object of .rds files
+Vert_KIB_1000um <- listFiles("rds",other=c("VE","KIB"))
+
+
+#now lets reset our working directory for the 1000 um set of photos 
+setwd("/Users/Katja/OneDrive/Documents/R/Lingcod analyses/Aging/1000 um")
+
+
+#Creating object of all images with names FR and ending in .tif
+imgs <- listFiles("tif",other="VE")
+#Creating object of all image ID's 
+ids <- getID(imgs)
+#We have 2 photos in this set. Here each line of code will cycle you through 103 photos. 
+digitizeRadii(imgs[1:10],id=ids[1:10],reading="KIB",edgeIsAnnulus=FALSE, scaleBar = TRUE, scaleBarLength = 1000, scaleBarUnits = "um", makeTransect = FALSE)
+digitizeRadii(imgs[11:20],id=ids[11:20],reading="KIB",edgeIsAnnulus=FALSE, scaleBar = TRUE, scaleBarLength = 1000, scaleBarUnits = "um", makeTransect = FALSE)
+
+showDigitizedImage("VE_SL46.1_KIB.rds")
+#Until here 9/28/2022 
+
+#visualize .rds files we just made
+listFiles("rds")
+#Create object of .rds files
+Vert_KIB_1000um <- listFiles("rds",other=c("VE","KIB"))
+
+
+#now that we have all of our labeled finrays, we have to go into the separate folders and pull out and combine all the .rds files into a single folder. 
+#just sort your folders by file type, copy and paste them into a new folder. Then set your working directory to that new folder. 
+
+setwd("/Users/Katja/OneDrive/Documents/R/Grayling Elizabeth/EH-fin ray ages/All RDS files")
+
+#now we make long and wide formats of the data. It will include ID, the reader, age at capture, total finray radius at capture, and finray radius at each
+#annuli. The long format is required to backcalculate length at age with the Fraser-lee model using the code below. Then I turn it into a wide format
+#to convert change in FL across ages to growth in mm/day using excel. 
+dfrad_KIB_long_all_um <- combineData(c(fns_KIB_50um,fns_KIB_100um,fns_KIB_200um), formatOut= "long")
+dfrad_KIB_wide_all_um <- combineData(c(fns_KIB_50um,fns_KIB_100um,fns_KIB_200um), formatOut= "wide")
+
+
+#Saving csv file of AG finray increments - update with your initials.
+write.csv(dfrad_KIB_long_all_um,file="AG_finrays_KIB_long.csv",quote=FALSE,row.names=FALSE)
+write.csv(dfrad_KIB_wide_all_um,file="AG_finrays_KIB_wide.csv",quote=FALSE,row.names=FALSE)
+
+
+
+
+
+####################### Back-calculating lengths and other random code - examples with my pike data. You will need FL data for each grayling.
+
+
+#Reading in dataframe with biological/catch data associated with each pike 
+
+setwd("/Users/tlcubbage/OneDrive - University of Alaska/Documents/UAF1/Thesis materials/Pike collection_summer20/Cleithra")
+
+pike_cleithra <- read.csv("pike_ID_data.csv", stringsAsFactors=FALSE) %>%
+  mutate(id=as.character(id))
+
+str(pike_cleithra)
+unique(pike_cleithra$id)
+
+#Joining the two dataframes to include both biological/catch/ and cleithral increments
+pike_cleithra_TLC_long <- pike_cleithra %>%
+  inner_join(dfrad_TLC_long,by="id")
+str(pike_cleithra_TLC_long)
+pike_cleithra_TLC_long$Population <- trimws(pike_cleithra_TLC_long$Population, which = "both")
+pike_cleithra_TLC_long$Habitat <- trimws(pike_cleithra_TLC_long$Habitat, which = "both")
+pike_cleithra_TLC_long$Population_Habitat <- paste(pike_cleithra_TLC_long$Population, pike_cleithra_TLC_long$Habitat, sep = " ")
+table(pike_cleithra_TLC_long$Population_Habitat)
+
+pike_cleithra_TLC_wide <- pike_cleithra %>%
+  inner_join(dfrad_TLC_wide,by="id")
+str(pike_cleithra_TLC_wide)
+pike_cleithra_TLC_wide$Population <- trimws(pike_cleithra_TLC_wide$Population, which = "both")
+pike_cleithra_TLC_wide$Habitat <- trimws(pike_cleithra_TLC_wide$Habitat, which = "both")
+pike_cleithra_TLC_wide$Population_Habitat <- paste(pike_cleithra_TLC_wide$Population, pike_cleithra_TLC_wide$Habitat, sep = " ")
+table(pike_cleithra_TLC_wide$Population_Habitat)
+str(pike_cleithra_TLC_wide)
+
+
+
+#Saving csv file of pike bio data and cleithral increments
+write.csv(pike_cleithra_TLC_long,file="Pike_Cleithra_all_dat_TLC_long.csv",quote=FALSE,row.names=FALSE)
+write.csv(pike_cleithra_TLC_wide,file="Pike_Cleithra_all_dat_TLC_wide.csv",quote=FALSE,row.names=FALSE)
+#Visualizing relationship between Fork length and radius at capture (radcap) to make sure there is a high association
+
+ggplot(pike_cleithra_TLC_long, aes(x = Fork_Length_mm, y = radcap, col = Location))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  ggtitle("Fork length positively associated with cleithra radius \n across locations")
+
+lm_radius_fl <- lm(radcap ~ Fork_Length_mm + Location, data = pike_cleithra_TLC_long)
+summary(lm_radius_fl)
+#R squared = 0.886 
+#Location does not signficantly affect the relationship between radius and fork length 
+
+
+#Using the RFishBC Fraser-Lee model to estimate lengths  
+#the alpha parameter is the size of the grayling in mm at fin ray formation, e.g. the biological intercept. Study on Bull trout < 300 mm used an alpha of 20, which might
+#be a good proxy for grayling. 
+pike_length_est_long <- backCalc(pike_cleithra_TLC_long,lencap = "Fork_Length_mm",BCM="FRALE",inFormat="long", a = 20, digits=0)
+pike_length_est_long_test_false <- backCalc(pike_cleithra_TLC_long,lencap = "Fork_Length_mm",BCM="FRALE",inFormat="long", a = 20, deletePlusGrowth = FALSE, digits=0)
+
+# I used a different back calculation formula for my final length estimations, but I think this wide format version should work for your grayling.
+pike_length_est_wide <- backCalc(pike_cleithra_TLC_wide,lencap = "Fork_Length_mm",BCM="FRALE",inFormat="wide", a = 20, digits=0)
+
+#Then save it as a csv, open it in excel, and I can send you my example excel sheet of how I took this data and calculated growth in mm/day for each age, 
+#by basically dividing the length of the growing season by the change in FL for that year of life of the grayling. This growing season varies only for the YOY 
+#period, and the year of capture. Ie instead of the grayling growing between May and September for example, it would grow from May until day of capture.
+write.csv(pike_length_est_long,file="pike_estlengths_fraser_lee_long_update.csv",quote=FALSE,row.names=FALSE)
+write.csv(pike_length_est_wide,file="pike_estlengths_fraser_lee_wide_update.csv",quote=FALSE,row.names=FALSE)
+pike_length_est_long <- read.csv("pike_estlengths_fraser_lee_long.csv", header = TRUE, sep = ",")
+View(pike_length_est_long)
+
+#plotting age vs length 
+ggplot(pike_length_est_long, aes(y = Fork_Length_mm, x = agecap, col = Location))+
+  geom_point()+
+  geom_smooth(method = "lm")
+
+ggplot(pike_length_est_long, aes(y = bclen, x = ann, col = Sex))+
+  geom_point()+
+  geom_smooth(method = "lm")
+
+#Linear modeling 
+mod1 <- lm(Fork_Length_mm ~ agecap + Location + Sex + Maturity, data = pike_length_est_long)
+summary(mod1)
+
+pike_length_est_long$agecap <- as.character(pike_length_est_long$agecap)
+
+ggplot(pike_length_est_long, aes(x = Fork_Length_mm, y = Weight_g, col= agecap))+
+  geom_point()+
+  facet_wrap(~Population_Habitat)
+
+
+#visualizing mean size at age among populations
+#Creating mean size at age table
+
+pike_cleithra_plus_age <- read.csv("pike_estlengths_fraser_lee_long_plusage.csv", header = TRUE, sep = ",")
+
+
+size_at_age1 <- aggregate(pike_length_est_long$bclen, list(pike_length_est_long$ann,pike_length_est_long$Population_Habitat), mean)
+size_at_age_sd1 <- aggregate(pike_length_est_long$bclen, list(pike_length_est_long$ann,pike_length_est_long$Population_Habitat), sd)
+colnames(size_at_age1) <-c("Age","Population","Forklength")
+colnames(size_at_age_sd1) <-c("Age","Population","St.dev")
+
+size_at_age2 <- aggregate(pike_cleithra_plus_age$Fork_Length_mm, list(pike_cleithra_plus_age$agecap,pike_cleithra_plus_age$Population_Habitat), mean)
+size_at_age_sd2 <- aggregate(pike_cleithra_plus_age$Fork_Length_mm, list(pike_cleithra_plus_age$agecap,pike_cleithra_plus_age$Population_Habitat), sd)
+colnames(size_at_age2) <-c("Age","Population","Forklength")
+colnames(size_at_age_sd2) <-c("Age","Population","St.dev")
+
+size_at_age_1 <- left_join(size_at_age1, size_at_age_sd1, by = c("Age", "Population"))
+
+size_at_age_2 <- left_join(size_at_age2, size_at_age_sd2, by = c("Age", "Population")) 
+
+size_at_age_all <- rbind(size_at_age_1,size_at_age_2)
+
+size_at_age_all$Age <- as.character(size_at_age_all$Age)
+table(size_at_age_all$Age)
+
+dev.off()
+
+ggplot(size_at_age_all, aes( x = Age, y = Forklength ))+
+  geom_density()+
+  facet_wrap(~ Population)
+
+ggplot(size_at_age_all, aes(x=Age, y=Forklength, fill = Population)) + 
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_errorbar(aes(ymin=Forklength-St.dev, ymax=Forklength+St.dev), width=.2,position=position_dodge(.9))
+
+
+
