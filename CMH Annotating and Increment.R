@@ -6,17 +6,25 @@
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++####
 
 #Imaging####
-#Images in IPP 10 need to be Published with the scale bar burned into the calibrated image
+#Images in IPP 10 need to be Published with the scale bar burned into the calibrated image 
 #Configure "Quick Save to Publication to prompt for file name and un-check current zoom box, file type Tif, set image size to 0
 #Scale bars need to be standardized to 2mm across ALL images
 #Images need to be stored in folders separated by magnifications or taken at one magnification  
 #All images need to be saved as all Tiff or all jpg. You can't change between formats.
-#Example of nomenclature: M125C_0.8_DMC4500_0.63x_22LC_103_1
+#Example of nomenclature: M125C_0.8_DMC4500_0.63x_22LC_103_1 (the _ is very important!)
 
 #Install packages####
-install.packages("RFishBC")
+
+#install.packages("renv")
+#install.packages("renv", repos = "https://rstudio.r-universe.dev")
+#renv::init() #makes the folder that stores the library for the project
+#renv::activate() #takes snapshot of current libraries and stores versions in folder
+#only have to run renv when you add more packages
+
+#install.packages("RFishBC")
 library(RFishBC)
 library(dplyr) 
+
 
 #Setting working directory.#### 
 #This is where the IPP images are saved on your computer (V drive)
@@ -25,17 +33,17 @@ library(dplyr)
 #remember that you need two \\ or one / to code directories
 setwd("V:\\ADU\\Chris test images for RFishBC\\R1 710 22LC~103\\M125C_0.8_DMC4500_0.63x")
 
-#Set your images (imgs) and specimens (ids) as Characters for the first magnification.Populates in Env box####
+#Set your images (imgs) and specimens (ids) as Characters for the first magnification.Populates in Env####
 imgs <- listFiles("tif",other="0.8")
 ids <- getID(imgs)
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++####
 
-#This next command will pull up the first specimen image to be annotated and set some default settings#### 
+#digitizeRadii will pull up the first specimen image to be annotated and set some default settings#### 
 #SINGLE IMAGE imgs[#] is which image/set of images you are calling (example 0.8x) 
 #SINGLE SPECIMEN id=ids[#] is the specimen number/s you want (example specimen 1)
 #MULTIPLE IMAGES OR SPECIEMNS digitizeRadii(imgs[1:3],id=ids[1:3] calls up ids and imgs from Environment
-#"Reading" is the reader's initials (mine is CMH, replace with your initials)
+#"Reading" is the reader's initials (mine is CMH, replace with your initials). Multiple readers on one image or multiple reads on one image allowed
 #edgeIsAnnulus = FALSE if you do not want to count the edge OR = TRUE if you count the edge
 #makeTransect = FALSE to follow the curve of the specimen OR = TRUE to place a straight transect
 #snap2Transect = True if Coordinates of annuli are moved to fall exactly on the transect from the structure center. If FALSE the annuli will be where you place them regardless of transect line
@@ -45,7 +53,7 @@ ids <- getID(imgs)
 #To include the radial measurement with “plus-growth” then use deletePlusGrowth=FALSE
 #addNote = TRUE user will be prompted to add a special note to the RData file. Example: image was poor, some annuli were suspect
 #windowSize defaults to 7 and >7 is how you make the image window bigger aka zoom
-#zoom in and out: Actual size = ctrl + 0, zoom in = ctrl ++, zoom out = crtl +- (does this work?)
+######zoom in and out: Actual size = ctrl + 0, zoom in = ctrl ++, zoom out = crtl +- (does this work?)
 
 RFBCoptions() #see or set arguments for annotating, https://fishr-core-team.github.io/RFishBC/reference/RFBCoptions.html
 
@@ -56,9 +64,9 @@ digitizeRadii(imgs[1:3],id=ids[1:3],reading="CMH",edgeIsAnnulus=FALSE, scaleBar 
 #Annotations (capitalization matters!)
 # f for finish will move to the next task/image
 # d for delete will delete the point you just marked
-# q for abort will skip the current image and move to the next image
+# q for abort will skip the current image and move to the next image - takes you to next image
 # z for restart will let you begin labeling the current image again
-# k for kill will exit out of labeling images but save the previously labeled images
+# k for kill will exit out of labeling images but save the previously labeled images - saves previous image and exits out
 
 #When the image comes up, measure the scale bar in the image to give a reference point for the annual increments.Check console. Select F when done.
 #Mark the focus/origin of the specimen, each annulus, then mark the margin/edge of the specimen. Select F when done.  
@@ -68,23 +76,42 @@ digitizeRadii(imgs[1:3],id=ids[1:3],reading="CMH",edgeIsAnnulus=FALSE, scaleBar 
 warnings()
 
 #To view the annotated image####
-#showDigitizedImage Shows annotations. Able to reexaminine annotations overlay selected points from multiple readings of the structure.
+#showDigitizedImage Shows annotations. Able to re-examinine annotations overlay selected points from multiple readings of the structure.
 #connect = TRUE if the selected points should be connected with a line and FALSE for annotations only. Default = TRUE
 #Must not annotate out of order. The annuli numbers won't match up if you go out of order.
+
+
 showDigitizedImage("M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_1_CMH.rds")
 showDigitizedImage("M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_2_CMH.rds")
 showDigitizedImage("M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_3_CMH.rds")
 showDigitizedImage("M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_3_CMH.rds", connect = TRUE)
 showDigitizedImage("M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_3_CMH.rds", 
-                   connect = FALSE) #Takes the point to point lines away
+                   connect = FALSE) #False takes the point to point lines away
 
-#figure out how to combine all the images so you can view them all in succession 
+#You can also manipulate the display colors/shapes
+showDigitizedImage("M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_1_CMH.rds",pch.show="+",col.show="blue",
+                   col.connect="red",col.ann="black",cex.ann=1,
+                   annuliLabels=c(1:4))
+
+#You can also visualize different readers' annotations on the same structure. Let's say reader CMH reads M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_1_CMH.rds
+digitizeRadii(imgs[1],id=ids[1],reading="CMH"#Update with your initials
+              ,edgeIsAnnulus=FALSE, scaleBar = TRUE, scaleBarLength = 2, scaleBarUnits = "mm", makeTransect = FALSE)
+
+#Now, lets make an object just containing the different readings of M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_1_CMH.rds by readers CMH and KWM
+compare_readers <- listFiles("rds",other="M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_1_CMH.rds")
+
+#And visualize them together
+showDigitizedImage(compare_readers,col.show=c("yellow","red"),
+                   col.connect=c("red","yellow"),lwd.connect=2)
+
+
+#########figure out how to combine all the images so you can view them all in succession 
 #showDigitizedImage(c("M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_1_CMH.rds",
 "M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_2_CMH.rds",
 "M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_3_CMH.rds"))
 
-# if you try to run code to start labeling images but don't see anything pop up, it's likely you have an old pop-up open and need to close it.
-# if you can't see the whole image or the scale bar in the photo, make the window a bit bigger by pulling on the edges. For cleithra with broken edges, I 
+# if images won't open you have an old image open
+# if you can't see the whole image or the scale bar in the photo, make the window a bit bigger by pulling on the edges. 
 
 #visualize .rds files we just saved ####
 #listfile This returns a vector with all file names with the ext extension in the path folder/directory. 
@@ -93,7 +120,7 @@ showDigitizedImage("M125C_1.0x_0.8x_DMC4500_0.63x_22LC_103_3_CMH.rds",
 
 listFiles("rds")
 
-#Create object of .rds files (code won't accept numbers first) (populates in Env)
+#Create object of .rds files (code won't accept numbers first, populates in Env)
 X0.8_22LC_103_CMH <- listFiles("rds",other=c("0.8","CMH"))
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++####
@@ -154,35 +181,42 @@ setwd("V:\\ADU\\Chris test images for RFishBC\\R1 710 22LC~103\\22LC~103 Annotat
 #Then I turn it into a wide format to convert change in FL across ages to growth in mm/day using excel. 
 #combine the Values (chr in Env. box) you set for each magnification rds file. Name spreadsheet with the structure and ID 
 #Rename the combined data with the sample ID and what structure 
-Oto_22LC_103_CMH_long_all_mm <- combineData(c(X0.8_22LC_103_CMH,X1.0_22LC_103_CMH, X1.25_22LC_103_CMH),
-                                            formatOut= "long")
+Oto_22LC_103_CMH_long_all_mm <- combineData(c(X0.8_22LC_103_CMH,X1.0_22LC_103_CMH,
+                                              X1.25_22LC_103_CMH), formatOut= "long")
 
-Oto_22LC_103_CMH_wide_all_mm <- combineData(c(X0.8_22LC_103_CMH,X1.0_22LC_103_CMH, X1.25_22LC_103_CMH),
-                                            formatOut= "wide")
+Oto_22LC_103_CMH_wide_all_mm <- combineData(c(X0.8_22LC_103_CMH,X1.0_22LC_103_CMH,
+                                              X1.25_22LC_103_CMH), formatOut= "wide")
 
 
 #Saving csv file of increments - update with your initials.
 #these populate in the RDS folder as excel csv files
-write.csv(Oto_22LC_103_CMH_long_all_mm,file="Oto_22LC_103_CMH_long.csv",quote=FALSE,row.names=FALSE)
-write.csv(Oto_22LC_103_CMH_wide_all_mm,file="Oto_22LC_103_CMH_wide.csv",quote=FALSE,row.names=FALSE)
+write.csv(Oto_22LC_103_CMH_long_all_mm,file="Oto_22LC_103_CMH_long.csv",
+          quote=FALSE,row.names=FALSE)
+write.csv(Oto_22LC_103_CMH_wide_all_mm,file="Oto_22LC_103_CMH_wide.csv",
+          quote=FALSE,row.names=FALSE)
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++####
 
+#CODE NOT DONE BELOW THIS LINE####
 
-#Back-calculating lengths and other random code - examples with my pike data. You will need FL data for each grayling.####
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++####
+
+#Back-calculating lengths and other random code####
+#You will need Fork Length data for each specimen
 
 
-#Reading in dataframe with biological/catch data associated with each pike 
+#Reading in dataframe with biological/catch data associated with each specimen
 
 setwd("/Users/tlcubbage/OneDrive - University of Alaska/Documents/UAF1/Thesis materials/Pike collection_summer20/Cleithra")
 
+#read in CSV with fish ID and length at capture. Data must include Sample ID and length at capture
 pike_cleithra <- read.csv("pike_ID_data.csv", stringsAsFactors=FALSE) %>%
   mutate(id=as.character(id))
 
 str(pike_cleithra)
 unique(pike_cleithra$id)
 
-#Joining the two dataframes to include both biological/catch/ and cleithral increments####
+#Joining the two dataframes to include both biological/catch/ and increments####
 pike_cleithra_TLC_long <- pike_cleithra %>%
   inner_join(dfrad_TLC_long,by="id")
 str(pike_cleithra_TLC_long)

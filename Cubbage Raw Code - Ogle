@@ -10,7 +10,7 @@ library(dplyr)
 
 ######Setting working directory. This is where the **50 um only** fin ray photos are saved on your computer, 
 #so be sure to update accordingly.
-setwd("/Users/Katja/OneDrive/Documents/R/Lingcod analyses/Aging")
+setwd("S:\Shared\R packages\Cubbage_RFishBC_Demo")
 
 
 #Creating object of all images with names VE and ending in .tif
