@@ -197,7 +197,7 @@ write.csv(Oto_22LC_103_CMH_wide_all_mm,file="Oto_22LC_103_CMH_wide.csv",
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++####
 
-#CODE NOT DONE BELOW THIS LINE####
+#CODE NOT DONE BELOW THIS LINE#### #Pull images from reference collection and call in associated somatic data from .csv
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++####
 
